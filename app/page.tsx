@@ -57,7 +57,7 @@ export default function Home() {
       </div>
       <div className="visual-strip">
         <div className="minister-picker">
-          <p id="role-label" className="control-label">Choose your minister</p>
+          <p id="role-label" className="control-label">Choose a pay packet</p>
           <RadioGroup value={role} onValueChange={v=>changeRole(v as Role)} aria-labelledby="role-label" aria-describedby="portrait-note" className="portrait-options">
             {([{value:'mr4',image:'chan-chun-sing',label:'MR4 minister',name:'Chan Chun Sing',caption:'MR4 example'},{value:'pm',image:'lawrence-wong',label:'Prime Minister',name:'Lawrence Wong',caption:'Prime Minister'}] as const).map(person=>
               <label key={person.value} className="portrait-option">
@@ -103,7 +103,7 @@ export default function Home() {
         <label className="personal-income" htmlFor="personal-monthly">Monthly base salary <span>SGD</span><input id="personal-monthly" type="number" inputMode="decimal" min="0" step="100" value={personalMonthlyText} onChange={event=>{setPersonalMonthlyText(event.target.value);setPersonalError('');}}/></label>
         {personalError&&<p className="error" role="alert">{personalError}</p>}<button type="button" className="personal-submit" onClick={savePersonal}>Compare my salary</button>
       </section></div>}
-      <p id="portrait-note" className="art-caption">Illustrative pay, not personal salary disclosure. Chan Chun Sing represents an MR4 example; his grade is not asserted.</p>
+      <p id="portrait-note" className="art-caption">{personal?'Your input stays in this browser and is only used for this illustration.':'Illustrative pay, not personal salary disclosure. Chan Chun Sing represents an MR4 example; his grade is not asserted.'}</p>
       <div className="working-panel">
         <p className="slider-intro">Slide to see the bonus add up</p>
         <div className="bonus-control"><div className="bonus-heading"><label id="bonus-label">{personal?'Additional bonus':role==='pm'?'National bonus':'Performance + national bonuses'}</label><strong>{months.toLocaleString('en-SG',{maximumFractionDigits:2})}<small> months</small></strong></div>
