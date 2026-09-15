@@ -128,16 +128,16 @@
 .graphic-options img{width:24px;height:22px;object-fit:contain;pointer-events:none;}
 .graphic-options span{pointer-events:none;}
 .equivalent-value{color:#efc861;font-size:20px;font-weight:600;line-height:1.2;margin-top:12px;overflow-wrap:anywhere;}
-.comparison-scene{min-height:200px;}
-.comparison-scene .money-field{height:200px;}
-.comparison-icon{position:absolute;width:16.6667%;height:24px;transition:opacity .12s,transform .12s;}
-.comparison-icon img{display:block;max-width:100%;height:100%;object-fit:contain;margin:auto;}
+.comparison-scene{container-type:inline-size;min-height:0;aspect-ratio:10/7;flex:none;}
+.comparison-scene .money-field{height:100%;}
+.comparison-icon{position:absolute;width:32%;aspect-ratio:1;transition:opacity .12s,transform .12s;}
+.comparison-icon img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 2px #0006);}
 @media(max-width:760px){
   .graphic-choice{margin-top:10px;}.graphic-choice>p{font-size:10px;}.graphic-options{gap:3px!important;}
   .graphic-options label{font-size:9px;padding:4px 1px;min-height:60px;overflow-wrap:anywhere;}
   .graphic-options img{width:21px;height:21px;}
   .equivalent-value{font-size:15px;margin-top:8px;}
-  .comparison-scene{min-height:112px;}.comparison-scene .money-field{height:112px;--comparison-step:14px;}
-  .comparison-icon{height:14px;}
+
+
 }
 

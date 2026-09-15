@@ -75,7 +75,7 @@ export default function Home() {
           {equivalentText&&<p className="equivalent-value" data-testid="equivalent">{graphic==='household'?'≈ ':''}{equivalentText}</p>}
           <div className={'money-scene '+(graphic==='money'?'':'comparison-scene')} aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
             const opacity=Math.max(0,Math.min(1,equivalent.icons-i));
-            return <div key={i} className={graphic==='money'?'money-bundle':'comparison-icon'} style={{left:((i%6)*(graphic==='money'?14:100/6))+'%',bottom:'calc('+Math.floor(i/6)+' * var('+(graphic==='money'?'--money-step, 14px':'--comparison-step, 24px')+'))',opacity,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
+            return <div key={i} className={graphic==='money'?'money-bundle':'comparison-icon'} style={{left:((i%6)*(graphic==='money'?14:13)+(graphic==='money'?0:(Math.floor(i/6)%2)*2))+'%',bottom:'calc('+Math.floor(i/6)+' * var('+(graphic==='money'?'--money-step, 14px':'--comparison-step, 5cqw')+'))',opacity,zIndex:graphic==='money'?undefined:48-i,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
           })}</div></div>
           <span className="money-scale">{graphicConfig.legend}{equivalent.icons>48?' · Graphic capped at 48 icons; count shown in full.':''}</span>
         </div>
