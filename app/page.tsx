@@ -36,36 +36,46 @@ export default function Home() {
     <div className="page-heading"><p className="eyebrow">SINGAPORE · MINISTERIAL SALARIES</p><h1>What's in the <span>pay packet?</span></h1><p>Pick a role. Move the bonus. See what adds up.</p></div>
     <section className="calculator" aria-label="Ministerial salary calculator">
       <div className="choices">
-        <div><p className="control-label" id="role-label"><span>01</span> Choose a role</p>
-          <RadioGroup value={role} onValueChange={v=>changeRole(v as Role)} aria-labelledby="role-label" className="segmented">
-            <label><RadioGroupItem value="mr4"/><span>MR4 minister</span></label><label><RadioGroupItem value="pm"/><span>Prime Minister</span></label>
-          </RadioGroup>
-        </div>
-        <div><p className="control-label" id="framework-label"><span>02</span> Choose a framework</p>
+        <p className="calculator-intro">Explore the pay packet</p>
+        <div className="framework-choice"><p className="control-label" id="framework-label">Framework</p>
           <RadioGroup value={framework} onValueChange={v=>setFramework(v as Framework)} aria-labelledby="framework-label" className="segmented framework">
             <label><RadioGroupItem value="previous"/><span>Previous</span></label><label><RadioGroupItem value="revised"/><span>2026 benchmark</span></label>
           </RadioGroup>
         </div>
       </div>
-      <div className="stage">
-        <div className="stage-top"><span className="pill">{role==='mr4'?'MR4 · ENTRY-LEVEL MINISTER':'PRIME MINISTER'}</span><span className="stage-index">{framework==='previous'?'2012 FRAMEWORK':'2026 BENCHMARK'}</span></div>
-        <div className="character-scene" aria-hidden="true">
-          <span className="scene-circle"/><span className="scene-note">A little perspective<br/>on a big number.</span>
-          <img className="character" src={'/art/'+(role==='mr4'?'chan-chun-sing':'lawrence-wong')+'.png'} alt="" width="1024" height="1536"/>
-          <div className="money-field">{Array.from({length:48},(_,i)=>{
-            const opacity=Math.max(0,Math.min(1,moneyUnits(pay.total)-i));
-            return <div key={i} className="money-bundle" style={{left:((i%6)*14+1)+'%',bottom:(Math.floor(i/6)*14)+'px',opacity,transform:'translateY('+(opacity?0:12)+'px) rotate('+(i%2?4:-4)+'deg)'}}><img src="/art/money-stack.png" width="1536" height="1024" alt=""/></div>;
-          })}</div>
+      <div className="visual-strip">
+        <div className="minister-picker">
+          <p id="role-label" className="control-label">Choose your minister</p>
+          <RadioGroup value={role} onValueChange={v=>changeRole(v as Role)} aria-labelledby="role-label" aria-describedby="portrait-note" className="portrait-options">
+            {([{value:'mr4',image:'chan-chun-sing',label:'MR4 minister',name:'Chan Chun Sing',caption:'MR4 example'},{value:'pm',image:'lawrence-wong',label:'Prime Minister',name:'Lawrence Wong',caption:'Prime Minister'}] as const).map(person=>
+              <label key={person.value} className="portrait-option">
+                <RadioGroupItem value={person.value} aria-label={person.label}/>
+                <img src={'/art/'+person.image+'.png'} alt="" width="1024" height="1536" loading="eager" decoding="async" fetchPriority={person.value === 'mr4' ? 'high' : 'low'}/>
+                <span className="portrait-rank">{person.caption}</span>
+                <span className="portrait-name">{person.name}</span>
+                <span className="portrait-status" aria-hidden="true">{role===person.value?'✓ Selected':'Select'}</span>
+              </label>
+            )}
+          </RadioGroup>
         </div>
-        <div className="art-caption">Illustrative framework calculation, not this person's disclosed salary.<span>{role==='mr4'?'Chan Chun Sing illustrates the role; his salary grade is not asserted.':'Lawrence Wong illustrates the Prime Minister role.'}</span></div>
+        <div className="money-panel">
+          <div className="total-label"><span>TOTAL ANNUAL PAY</span><span className="scenario-tag">{level}</span></div>
+          <div className="total" data-testid="total">{currency(pay.total)}</div>
+          <div className="total-meta"><span><i className="dot basic"/>{currency(pay.fixed)} fixed</span><span><i className="dot national"/>{currency(pay.variable)} variable</span></div>
+          <div className="money-scene" aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
+            const opacity=Math.max(0,Math.min(1,moneyUnits(pay.total)-i));
+            return <div key={i} className="money-bundle" style={{left:((i%6)*14+1)+'%',bottom:'calc('+Math.floor(i/6)+' * var(--money-step, 14px))',opacity,transform:'translateY('+(opacity?0:12)+'px) rotate('+(i%2?4:-4)+'deg)'}}><img src="/art/money-stack.png" width="1536" height="1024" alt=""/></div>;
+          })}</div></div>
+          <span className="money-scale">Each bundle unit ≈ S$100,000</span>
+        </div>
       </div>
+      <p id="portrait-note" className="art-caption">Illustrative pay, not personal salary disclosure. Chan Chun Sing represents an MR4 example; his grade is not asserted.</p>
       <div className="working-panel">
-        <div className="total-label"><span>TOTAL ANNUAL PAY</span><span className="scenario-tag">{level}</span></div>
-        <div className="total" data-testid="total">{currency(pay.total)}</div>
-        <div className="total-meta"><span><i className="dot basic"/>{currency(pay.fixed)} fixed</span><span><i className="dot national"/>{currency(pay.variable)} variable</span></div>
+        <p className="slider-intro">Slide to see the bonus add up</p>
         <div className="bonus-control"><div className="bonus-heading"><label id="bonus-label">{role==='pm'?'National bonus':'Performance + national bonuses'}</label><strong>{months.toLocaleString('en-SG',{maximumFractionDigits:2})}<small> months</small></strong></div>
           <Slider aria-labelledby="bonus-label" aria-describedby="bonus-assumption" value={[months]} min={0} max={12} step={0.25} onValueChange={v=>{setBonus(linkedBonuses(role,Array.isArray(v)?v[0]:v));setCustom(false);}} className="bonus-slider"/>
           <div className="slider-ticks"><span>Min · 0</span><span>Norm · 6</span><span>Max · 12</span></div>
+          <p className="bonus-value">{currency(pay.performance+pay.national)} <span>in {role==='pm'?'national bonus':'performance + national bonuses'}</span></p>
           <p id="bonus-assumption" className="assumption">Plus {avc} month{avc===1?'':'s'} AVC. {months===12?(role==='pm'?'Maximum national bonus; AVC is a separate assumption.':'Maximum performance + national bonuses; AVC is a separate assumption.'):'AVC is a separate variable payment.'}</p>
         </div>
         <div className="control-actions"><button onClick={()=>setExpanded(!expanded)} aria-expanded={expanded} aria-controls={expanded?'components':undefined}><SlidersHorizontal size={15}/> Adjust components <ChevronDown size={14} className={expanded?'rotated':''}/></button><button onClick={reset} aria-label="Reset to norm"><RotateCcw size={14}/><span>Reset to norm</span></button></div>
@@ -92,7 +102,7 @@ export default function Home() {
     <section id="sources" className="sources"><details><summary><span>Sources & how this works</span><ChevronDown size={18}/></summary><div className="source-body">
       <p>Figures verified 15 September 2026. All amounts are Singapore dollars, annualised and before tax. Calculations use the published reference point, not an individual's salary or the upper end of a salary band.</p>
       <p>Monthly reference = annual norm ÷ 20. Fixed pay = 12 months + a fixed 13th month. Add the selected AVC, performance and national bonus months. MR4 norm: 1 AVC + 3 performance + 3 national. PM norm: 1 AVC + 6 national, with no performance bonus.</p>
-      <p>The main slider moves MR4 performance and national bonuses together. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
+      <p>The main slider moves MR4 performance and national bonuses together; for the PM it moves national bonus only. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
       <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The illustration uses the same scale throughout: one bundle unit per S$100,000, with partial units faded. Above S$4.8m the illustration is capped; the numerical calculation continues.</p>
       <p>The current report gives a typical AVC of 1 month, not a universal maximum. The 2025 civil-service AVC was 1.7 months. “Maximum” here refers only to performance and national bonuses at the stated AVC assumption.</p>
       <ul><li><a href={SOURCES.previous} target="_blank" rel="noreferrer">2012 White Paper · salary structure, paragraphs 77–78 ↗</a></li><li><a href={SOURCES.revised} target="_blank" rel="noreferrer">2026 review · Table 1 and Annex E ↗</a></li><li><a href={SOURCES.october} target="_blank" rel="noreferrer">PMO · implementation announcement, 8 September 2026 ↗</a></li><li><a href={SOURCES.avc} target="_blank" rel="noreferrer">PSD · 2025 civil-service AVC ↗</a></li></ul>
@@ -101,4 +111,6 @@ export default function Home() {
     <p className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
   </main>;
 }
+
+
 

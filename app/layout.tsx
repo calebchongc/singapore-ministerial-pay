@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './calculator.css';
 export const metadata: Metadata = {
   title: 'What is in the pay packet? | Singapore ministerial salaries',
   description: 'Explore Singapore ministerial salary frameworks, fixed pay and bonuses. An independent interactive explainer with sourced calculations.',
