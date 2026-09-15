@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculate, linkedBonuses, parseAvc, moneyUnits } from './salary.ts';
+import { calculate, linkedBonuses, parseAvc, moneyUnits, scaleComparison } from './salary.ts';
 
 test('published norms across both roles and frameworks', () => {
   for (const [role, old, revised] of [['mr4',1100000,1800000],['pm',2200000,3600000]] as const) {
@@ -37,4 +37,22 @@ test('absolute money scale is monotonic', () => {
   for(let m=0;m<=12;m+=.25){const units=moneyUnits(calculate('mr4','previous',linkedBonuses('mr4',m),1).total);assert.ok(units>=prev);prev=units;}
   assert.equal(moneyUnits(1000000),10);
   assert.equal(moneyUnits(2000000),20);
+});
+
+test('chicken rice uses S$4 whole plates and groups 25,000 plates per icon', () => {
+  assert.equal(scaleComparison(1100000,'rice').quantity,275000);
+  assert.equal(scaleComparison(1100000,'rice').icons,11);
+  assert.equal(scaleComparison(11,'rice').quantity,2);
+  assert.equal(scaleComparison(0,'rice').quantity,0);
+});
+test('one house represents a rounded annual household income, not property price', () => {
+  assert.equal(scaleComparison(150000,'household').quantity,1);
+  assert.equal(scaleComparison(1800000,'household').quantity,12);
+  assert.equal(scaleComparison(4680000,'household').icons,31.2);
+});
+test('all graphic scales remain proportional across roles and frameworks', () => {
+  for(const mode of ['money','rice','household'] as const){
+    assert.equal(scaleComparison(2200000,mode).icons,2*scaleComparison(1100000,mode).icons);
+    assert.ok(scaleComparison(6000000,mode).icons>scaleComparison(4800000,mode).icons);
+  }
 });

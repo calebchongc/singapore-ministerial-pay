@@ -1,6 +1,12 @@
 export type Role = 'mr4' | 'pm';
 export type Framework = 'previous' | 'revised';
 export type Bonuses = { performance: number; national: number };
+export type GraphicMode = 'money' | 'rice' | 'household';
+export const GRAPHICS = {
+  money: {label:'Money',image:'money-stack.png',unitValue:100000,unitsPerIcon:1,legend:'Each bundle unit ≈ S$100,000'},
+  rice: {label:'Chicken rice',image:'chicken-rice.png',unitValue:4,unitsPerIcon:25000,legend:'1 plate = S$4 · Each graphic = 25,000 plates'},
+  household: {label:'Household income',image:'household.png',unitValue:150000,unitsPerIcon:1,legend:'Each house = 1 year of household income ≈ S$150,000'},
+} as const;
 // Reference norms, not personal remuneration. 2026 report Table 1 and Annex E.
 export const REFERENCES = {
   mr4: { previous: 1_100_000, revised: 1_800_000 },
@@ -11,6 +17,7 @@ export const SOURCES = {
   revised: 'https://go.gov.sg/2026report',
   october: 'https://www.pmo.gov.sg/newsroom/media-release-on-building-a-strong-team-for-singapore/',
   avc: 'https://www.psd.gov.sg/newsroom/civil-service-year-end-payment-2025/',
+  household: 'https://www.singstat.gov.sg/-/media/files/publications/households/pp-s32.ashx',
 };
 export function linkedBonuses(role: Role, months: number): Bonuses {
   return role === 'pm' ? { performance: 0, national: months } : { performance: months / 2, national: months / 2 };
@@ -29,5 +36,10 @@ export function parseAvc(raw: string): number | null {
   return raw.trim()!==''&&Number.isFinite(value)&&value>=0&&(value+25)*180000<Number.MAX_SAFE_INTEGER?value:null;
 }
 export function moneyUnits(total: number): number {return total/100000;}
+export function scaleComparison(total:number,mode:GraphicMode) {
+  const config=GRAPHICS[mode];
+  const exact=total/config.unitValue;
+  return {quantity:mode==='rice'?Math.floor(exact):exact,icons:exact/config.unitsPerIcon};
+}
 export const currency=(value:number)=>'S$'+new Intl.NumberFormat('en-SG',{maximumFractionDigits:0}).format(value);
 

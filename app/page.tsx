@@ -4,24 +4,28 @@ import { useSalaryTool } from '@/lib/use-salary-tool';
 import { ArrowDown, ArrowUpRight, RotateCcw, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
-import { calculate, currency, linkedBonuses, moneyUnits, parseAvc, SOURCES, type Role, type Framework } from '@/lib/salary';
+import { calculate, currency, linkedBonuses, scaleComparison, GRAPHICS, parseAvc, SOURCES, type GraphicMode, type Role, type Framework } from '@/lib/salary';
 
 export default function Home() {
   const [role,setRole]=useState<Role>('mr4');
   const [framework,setFramework]=useState<Framework>('previous');
+  const [graphic,setGraphic]=useState<GraphicMode>('money');
   const [bonus,setBonus]=useState(linkedBonuses('mr4',6));
   const [avc,setAvc]=useState(1);
   const [avcText,setAvcText]=useState('1');
   const [custom,setCustom]=useState(false);
   const [expanded,setExpanded]=useState(false);
   const [announcement,setAnnouncement]=useState('');
-  useSalaryTool(useCallback(s=>{setRole(s.role);setFramework(s.framework);setBonus(s.bonus);setAvc(s.avc);setAvcText(String(s.avc));setCustom(true);},[]));
+  useSalaryTool(useCallback(s=>{setRole(s.role);setFramework(s.framework);setBonus(s.bonus);setAvc(s.avc);setAvcText(String(s.avc));if(s.graphic)setGraphic(s.graphic);setCustom(true);},[]));
   const pay=calculate(role,framework,bonus,avc);
+  const graphicConfig=GRAPHICS[graphic];
+  const equivalent=scaleComparison(pay.total,graphic);
+  const equivalentText=graphic==='money'?'':graphic==='rice'?equivalent.quantity.toLocaleString('en-SG')+' plates':equivalent.quantity.toLocaleString('en-SG',{maximumFractionDigits:1})+' years of median household income';
   const other=calculate(role,framework==='previous'?'revised':'previous',bonus,avc);
   const months=bonus.performance+bonus.national;
   const avcError=parseAvc(avcText)===null;
   const level=custom?'Custom':months===6?'Norm bonuses':months===0?'Minimum bonuses':months===12?'Maximum bonuses':'Your scenario';
-  useEffect(()=>{const timer=setTimeout(()=>setAnnouncement('Total annual pay '+currency(pay.total)),350);return()=>clearTimeout(timer);},[pay.total]);
+  useEffect(()=>{const timer=setTimeout(()=>setAnnouncement('Total annual pay '+currency(pay.total)+(equivalentText?'. Equivalent to '+equivalentText:'')),350);return()=>clearTimeout(timer);},[pay.total,equivalentText]);
   function changeRole(value: Role) {setRole(value);setBonus(linkedBonuses(value,months));setCustom(false);}
   function reset(){setBonus(linkedBonuses(role,6));setAvc(1);setAvcText('1');setCustom(false);}
   const parts=[
@@ -57,16 +61,23 @@ export default function Home() {
               </label>
             )}
           </RadioGroup>
+          <div className="graphic-choice">
+            <p id="graphic-label">Show the value as</p>
+            <RadioGroup value={graphic} onValueChange={v=>setGraphic(v as GraphicMode)} aria-labelledby="graphic-label" className="graphic-options">
+              {(Object.keys(GRAPHICS) as GraphicMode[]).map(mode=><label key={mode}><RadioGroupItem value={mode}/><img src={'/art/'+GRAPHICS[mode].image} alt="" width="24" height="24" loading="eager" decoding="async"/><span>{GRAPHICS[mode].label}</span></label>)}
+            </RadioGroup>
+          </div>
         </div>
         <div className="money-panel">
           <div className="total-label"><span>TOTAL ANNUAL PAY</span><span className="scenario-tag">{level}</span></div>
           <div className="total" data-testid="total">{currency(pay.total)}</div>
           <div className="total-meta"><span><i className="dot basic"/>{currency(pay.fixed)} fixed</span><span><i className="dot national"/>{currency(pay.variable)} variable</span></div>
-          <div className="money-scene" aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
-            const opacity=Math.max(0,Math.min(1,moneyUnits(pay.total)-i));
-            return <div key={i} className="money-bundle" style={{left:((i%6)*14+1)+'%',bottom:'calc('+Math.floor(i/6)+' * var(--money-step, 14px))',opacity,transform:'translateY('+(opacity?0:12)+'px) rotate('+(i%2?4:-4)+'deg)'}}><img src="/art/money-stack.png" width="1536" height="1024" alt=""/></div>;
+          {equivalentText&&<p className="equivalent-value" data-testid="equivalent">{graphic==='household'?'≈ ':''}{equivalentText}</p>}
+          <div className={'money-scene '+(graphic==='money'?'':'comparison-scene')} aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
+            const opacity=Math.max(0,Math.min(1,equivalent.icons-i));
+            return <div key={i} className={graphic==='money'?'money-bundle':'comparison-icon'} style={{left:((i%6)*(graphic==='money'?14:100/6))+'%',bottom:'calc('+Math.floor(i/6)+' * var('+(graphic==='money'?'--money-step, 14px':'--comparison-step, 24px')+'))',opacity,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
           })}</div></div>
-          <span className="money-scale">Each bundle unit ≈ S$100,000</span>
+          <span className="money-scale">{graphicConfig.legend}{equivalent.icons>48?' · Graphic capped at 48 icons; count shown in full.':''}</span>
         </div>
       </div>
       <p id="portrait-note" className="art-caption">Illustrative pay, not personal salary disclosure. Chan Chun Sing represents an MR4 example; his grade is not asserted.</p>
@@ -103,7 +114,8 @@ export default function Home() {
       <p>Figures verified 15 September 2026. All amounts are Singapore dollars, annualised and before tax. Calculations use the published reference point, not an individual's salary or the upper end of a salary band.</p>
       <p>Monthly reference = annual norm ÷ 20. Fixed pay = 12 months + a fixed 13th month. Add the selected AVC, performance and national bonus months. MR4 norm: 1 AVC + 3 performance + 3 national. PM norm: 1 AVC + 6 national, with no performance bonus.</p>
       <p>The main slider moves MR4 performance and national bonuses together; for the PM it moves national bonus only. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
-      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The illustration uses the same scale throughout: one bundle unit per S$100,000, with partial units faded. Above S$4.8m the illustration is capped; the numerical calculation continues.</p>
+      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. Graphic scales stay fixed across roles and frameworks. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents one year of median household income, not a property purchase. Partial icons are faded. Illustrations stop at 48 icons; numerical totals continue.</p>
+      <p>The house scale uses S$150,000 per year, rounded from the 2025 median monthly household market income of S$12,446 × 12 = S$149,352. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
       <p>The current report gives a typical AVC of 1 month, not a universal maximum. The 2025 civil-service AVC was 1.7 months. “Maximum” here refers only to performance and national bonuses at the stated AVC assumption.</p>
       <ul><li><a href={SOURCES.previous} target="_blank" rel="noreferrer">2012 White Paper · salary structure, paragraphs 77–78 ↗</a></li><li><a href={SOURCES.revised} target="_blank" rel="noreferrer">2026 review · Table 1 and Annex E ↗</a></li><li><a href={SOURCES.october} target="_blank" rel="noreferrer">PMO · implementation announcement, 8 September 2026 ↗</a></li><li><a href={SOURCES.avc} target="_blank" rel="noreferrer">PSD · 2025 civil-service AVC ↗</a></li></ul>
     </div></details></section>
