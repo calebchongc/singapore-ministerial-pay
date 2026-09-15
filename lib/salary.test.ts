@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculate, calculatePersonal, linkedBonuses, parseAvc, moneyUnits, scaleComparison } from './salary.ts';
+import { calculate, calculatePersonal, linkedBonuses, parseAvc, moneyUnits, coinUnits, scaleComparison } from './salary.ts';
 
 test('published norms across both roles and frameworks', () => {
   for (const [role, old, revised] of [['mr4',1100000,1800000],['pm',2200000,3600000]] as const) {
@@ -37,6 +37,11 @@ test('absolute money scale is monotonic', () => {
   for(let m=0;m<=12;m+=.25){const units=moneyUnits(calculate('mr4','previous',linkedBonuses('mr4',m),1).total);assert.ok(units>=prev);prev=units;}
   assert.equal(moneyUnits(1000000),10);
   assert.equal(moneyUnits(2000000),20);
+});
+test('copper coin fallback gives one icon per S$2,000 below a bundle', () => {
+  assert.equal(coinUnits(2000),1);
+  assert.equal(coinUnits(99999),99999/2000);
+  assert.equal(coinUnits(100000),50);
 });
 
 test('chicken rice uses S$4 whole plates and groups 25,000 plates per icon', () => {

@@ -5,8 +5,9 @@ export type GraphicMode = 'money' | 'rice' | 'household';
 export const GRAPHICS = {
   money: {label:'Money',image:'money-stack-thousand-note.png',unitValue:100000,unitsPerIcon:1,legend:'Each bundle ≈ S$100,000'},
   rice: {label:'Chicken rice',image:'chicken-rice.png',unitValue:4,unitsPerIcon:25000,legend:'1 plate = S$4 · Each graphic = 25,000 plates'},
-  household: {label:'HDB block',image:'household.png',unitValue:149352,unitsPerIcon:1,legend:'Each HDB block = annual median household income, S$149,352'},
+  household: {label:'Household income',image:'household.png',unitValue:149352,unitsPerIcon:1,legend:'Each house = annual median household income, S$149,352'},
 } as const;
+export const COIN_GRAPHIC = {image:'copper-cent-coins.png',unitValue:2000,legend:'Each copper coin = S$2,000'};
 // Reference norms, not personal remuneration. 2026 report Table 1 and Annex E.
 export const REFERENCES = {
   mr4: { previous: 1_100_000, revised: 1_800_000 },
@@ -42,6 +43,7 @@ export function parseAvc(raw: string): number | null {
   return raw.trim()!==''&&Number.isFinite(value)&&value>=0&&(value+25)*180000<Number.MAX_SAFE_INTEGER?value:null;
 }
 export function moneyUnits(total: number): number {return total/100000;}
+export function coinUnits(total: number): number {return total/COIN_GRAPHIC.unitValue;}
 export function scaleComparison(total:number,mode:GraphicMode) {
   const config=GRAPHICS[mode];
   const exact=total/config.unitValue;

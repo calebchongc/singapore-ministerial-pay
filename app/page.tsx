@@ -4,7 +4,7 @@ import { useSalaryTool } from '@/lib/use-salary-tool';
 import { ArrowDown, ArrowUpRight, RotateCcw, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
-import { calculate, calculatePersonal, currency, linkedBonuses, scaleComparison, GRAPHICS, parseAvc, SOURCES, type GraphicMode, type Role, type Framework } from '@/lib/salary';
+import { calculate, calculatePersonal, currency, linkedBonuses, scaleComparison, coinUnits, COIN_GRAPHIC, GRAPHICS, parseAvc, SOURCES, type GraphicMode, type Role, type Framework } from '@/lib/salary';
 
 export default function Home() {
   const [role,setRole]=useState<Role>('mr4');
@@ -25,9 +25,11 @@ export default function Home() {
   useSalaryTool(useCallback(s=>{setRole(s.role);setFramework(s.framework);setBonus(s.bonus);setAvc(s.avc);setAvcText(String(s.avc));if(s.graphic)setGraphic(s.graphic);setCustom(true);},[]));
   const months=bonus.performance+bonus.national;
   const pay=personal?calculatePersonal(personalMonthly,months,avc):calculate(role,framework,bonus,avc);
-  const graphicConfig=GRAPHICS[graphic];
-  const equivalent=scaleComparison(pay.total,graphic);
-  const grid=graphic==='money'?{columns:8,leftStep:10.7,rowStep:6.95}:graphic==='rice'?{columns:7,leftStep:12,rowStep:9.826}:{columns:6,leftStep:13.6,rowStep:48/7};
+  const moneyUsesCoins=graphic==='money'&&pay.total<100000;
+  const graphicConfig=moneyUsesCoins?COIN_GRAPHIC:GRAPHICS[graphic];
+  const equivalent=moneyUsesCoins?{quantity:pay.total/COIN_GRAPHIC.unitValue,icons:coinUnits(pay.total)}:scaleComparison(pay.total,graphic);
+  const grid=moneyUsesCoins?{columns:10,leftStep:9.5,rowStep:8}:graphic==='money'?{columns:8,leftStep:10.7,rowStep:6.95}:graphic==='rice'?{columns:7,leftStep:12,rowStep:9.826}:{columns:6,leftStep:13.6,rowStep:48/7};
+  const hdbFraction=graphic==='household'&&equivalent.icons<1;
   const equivalentText=graphic==='money'?'':graphic==='rice'?equivalent.quantity.toLocaleString('en-SG')+' plates':equivalent.quantity.toLocaleString('en-SG',{maximumFractionDigits:1})+'× annual median household income';
   const other=personal?calculate('mr4',framework,linkedBonuses('mr4',6),1):calculate(role,framework==='previous'?'revised':'previous',bonus,avc);
   const avcError=parseAvc(avcText)===null;
@@ -87,10 +89,9 @@ export default function Home() {
           <div className="total" data-testid="total">{currency(pay.total)}</div>
           <div className="total-meta"><span><i className="dot basic"/>{currency(pay.fixed)} fixed</span><span><i className="dot national"/>{currency(pay.variable)} variable</span></div>
           {equivalentText&&<p className="equivalent-value" data-testid="equivalent">{graphic==='household'?'≈ ':''}{equivalentText}</p>}
-          <div className={'money-scene money-scene-'+graphic} aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
+          <div className={'money-scene money-scene-'+graphic+(moneyUsesCoins?' money-scene-coins':'')} aria-hidden="true"><div className="money-field">{hdbFraction?<div className="hdb-fraction"><div className="hdb-block hdb-silhouette"/><div className="hdb-block hdb-colour" style={{clipPath:'inset(0 '+((1-equivalent.icons)*100)+'% 0 0)'}}/></div>:Array.from({length:moneyUsesCoins?50:48},(_,i)=>{
             const opacity=Math.max(0,Math.min(1,equivalent.icons-i));
-            const fraction=Math.max(0,Math.min(1,equivalent.icons-i));
-            return <div key={i} className={graphic==='money'?'money-bundle':graphic==='household'?'hdb-reveal':'comparison-icon'} style={{left:((i%grid.columns)*grid.leftStep)+'%',bottom:'calc('+Math.floor(i/grid.columns)+' * '+grid.rowStep+'cqw)',opacity,zIndex:graphic==='money'?undefined:48-i,transform:'translateY('+(opacity?0:12)+'px)'}}>{graphic==='household'?<div className="hdb-block" style={{clipPath:'inset(0 '+((1-fraction)*100)+'% 0 0)'}}/>:<img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/>}</div>;
+            return <div key={i} className={graphic==='money'&&!moneyUsesCoins?'money-bundle':moneyUsesCoins?'coin-pile':'comparison-icon'} style={{left:((i%grid.columns)*grid.leftStep)+'%',bottom:'calc('+Math.floor(i/grid.columns)+' * '+grid.rowStep+'cqw)',opacity,zIndex:graphic==='money'&&!moneyUsesCoins?undefined:50-i,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
           })}</div></div>
           <span className="money-scale">{graphicConfig.legend}{equivalent.icons>48?' · Graphic capped at 48 icons; count shown in full.':''}</span>
         </div>
@@ -138,8 +139,8 @@ export default function Home() {
       <p>Figures verified 15 September 2026. All amounts are Singapore dollars, annualised and before tax. Calculations use the published reference point, not an individual's salary or the upper end of a salary band.</p>
       <p>Monthly reference = annual norm ÷ 20. Fixed pay = 12 months + a fixed 13th month. Add the selected AVC, performance and national bonus months. MR4 norm: 1 AVC + 3 performance + 3 national. PM norm: 1 AVC + 6 national, with no performance bonus.</p>
       <p>The main slider moves MR4 performance and national bonuses together; for the PM it moves national bonus only. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
-      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The value per icon and row spacing stay fixed across roles, frameworks and slider positions. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One HDB block represents annual median household income. Partial HDB blocks reveal from left to right. Illustrations stop at 48 icons; numerical totals continue.</p>
-      <p>The HDB scale uses S$149,352 a year, calculated from the 2025 median monthly household market income of S$12,446. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
+      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The value per icon and row spacing stay fixed across roles, frameworks and slider positions. One money bundle represents S$100,000; below that, each copper coin represents S$2,000. Each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents annual median household income. Below one household-income unit, an HDB block reveals from left to right against a grey silhouette. Illustrations stop at 48 icons; numerical totals continue.</p>
+      <p>The household-income scale uses S$149,352 a year, calculated from the 2025 median monthly household market income of S$12,446. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
       <p>The current report gives a typical AVC of 1 month, not a universal maximum. The 2025 civil-service AVC was 1.7 months. “Maximum” here refers only to performance and national bonuses at the stated AVC assumption.</p>
       <ul><li><a href={SOURCES.framework} target="_blank" rel="noreferrer">PSD framework explainer · 20-month norm ↗</a></li><li><a href={SOURCES.previous} target="_blank" rel="noreferrer">2012 PSD release · performance and National Bonus limits ↗</a></li><li><a href={SOURCES.revised} target="_blank" rel="noreferrer">2026 review · Table 3 and Annex E ↗</a></li><li><a href={SOURCES.october} target="_blank" rel="noreferrer">PMO · implementation announcement, 8 September 2026 ↗</a></li><li><a href={SOURCES.avc} target="_blank" rel="noreferrer">PSD · 2025 civil-service AVC ↗</a></li></ul>
     </div></details></section>
