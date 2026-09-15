@@ -45,10 +45,16 @@ test('chicken rice uses S$4 whole plates and groups 25,000 plates per icon', () 
   assert.equal(scaleComparison(11,'rice').quantity,2);
   assert.equal(scaleComparison(0,'rice').quantity,0);
 });
-test('household income is counted in months, with ten months per house', () => {
+test('household income is counted in months, with eight months per house', () => {
   assert.equal(scaleComparison(12500,'household').quantity,1);
   assert.equal(scaleComparison(1800000,'household').quantity,144);
-  assert.equal(scaleComparison(4680000,'household').icons,37.44);
+  assert.equal(scaleComparison(4680000,'household').icons,46.8);
+});
+test('the Prime Minister maximum maps to 46.8 S$100,000 pictograms', () => {
+  const maximum=calculate('pm','revised',linkedBonuses('pm',12),1).total;
+  assert.equal(scaleComparison(maximum,'money').icons,46.8);
+  assert.equal(scaleComparison(maximum,'rice').icons,46.8);
+  assert.equal(scaleComparison(maximum,'household').icons,46.8);
 });
 test('all graphic scales remain proportional across roles and frameworks', () => {
   for(const mode of ['money','rice','household'] as const){

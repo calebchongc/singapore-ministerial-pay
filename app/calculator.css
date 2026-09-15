@@ -32,9 +32,12 @@
 .dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0;}
 .basic{background:#344a32}.thirteenth{background:#798b6a}.avc{background:#e7bc58}.performance{background:#e99056}.national{background:#c33a3b}
 .money-panel .dot.basic{background:#94ad7e;}
-.money-scene{position:relative;container-type:inline-size;min-height:0;aspect-ratio:2;flex:none;overflow:hidden;margin-top:8px;}
+.money-scene{position:relative;container-type:inline-size;min-height:0;flex:none;overflow:hidden;margin-top:8px;}
+.money-scene-money{aspect-ratio:2;}
+.money-scene-rice{aspect-ratio:1.15;}
+.money-scene-household{aspect-ratio:1.25;}
 .money-field{position:absolute;bottom:0;left:0;right:0;height:100%;isolation:isolate;}
-.money-bundle{position:absolute;width:30%;aspect-ratio:100/61;overflow:hidden;transition:opacity .12s,transform .12s;}
+.money-bundle{position:absolute;width:25%;aspect-ratio:100/61;overflow:hidden;transition:opacity .12s,transform .12s;}
 .money-bundle img{width:100%;height:auto;clip-path:inset(0 0 39% 0);}
 .money-scale{font-size:11px;color:#aab49f;text-align:right;margin-top:7px;}
 .art-caption{font-size:12px;color:#69725f;background:#f7f8f4;padding:8px 22px;border-bottom:1px solid #dfe3d8;line-height:1.4;}
@@ -128,9 +131,9 @@
 .graphic-options img{width:24px;height:22px;object-fit:contain;pointer-events:none;}
 .graphic-options span{pointer-events:none;}
 .equivalent-value{color:#efc861;font-size:20px;font-weight:600;line-height:1.2;margin-top:12px;overflow-wrap:anywhere;}
-.comparison-scene{container-type:inline-size;min-height:0;aspect-ratio:10/7;flex:none;}
-.comparison-scene .money-field{height:100%;}
-.comparison-icon{position:absolute;width:32%;aspect-ratio:1;transition:opacity .12s,transform .12s;}
+.comparison-icon{position:absolute;aspect-ratio:1;transition:opacity .12s,transform .12s;}
+.money-scene-rice .comparison-icon{width:28%;}
+.money-scene-household .comparison-icon{width:32%;}
 .comparison-icon img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 2px #0006);}
 @media(max-width:760px){
   .graphic-choice{margin-top:10px;}.graphic-choice>p{font-size:10px;}.graphic-options{gap:3px!important;}

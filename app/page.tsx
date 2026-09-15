@@ -20,8 +20,7 @@ export default function Home() {
   const pay=calculate(role,framework,bonus,avc);
   const graphicConfig=GRAPHICS[graphic];
   const equivalent=scaleComparison(pay.total,graphic);
-  const visibleIcons=Math.min(48,equivalent.icons);
-  const pileRowStep=(graphic==='money'?31.7:38)/Math.max(1,Math.ceil(visibleIcons/6)-1);
+  const grid=graphic==='money'?{columns:8,leftStep:10.7,rowStep:6.95}:graphic==='rice'?{columns:7,leftStep:12,rowStep:9.826}:{columns:6,leftStep:13.6,rowStep:48/7};
   const equivalentText=graphic==='money'?'':graphic==='rice'?equivalent.quantity.toLocaleString('en-SG')+' plates':equivalent.quantity.toLocaleString('en-SG',{maximumFractionDigits:1})+' months of median household income';
   const other=calculate(role,framework==='previous'?'revised':'previous',bonus,avc);
   const months=bonus.performance+bonus.national;
@@ -75,9 +74,9 @@ export default function Home() {
           <div className="total" data-testid="total">{currency(pay.total)}</div>
           <div className="total-meta"><span><i className="dot basic"/>{currency(pay.fixed)} fixed</span><span><i className="dot national"/>{currency(pay.variable)} variable</span></div>
           {equivalentText&&<p className="equivalent-value" data-testid="equivalent">{graphic==='household'?'≈ ':''}{equivalentText}</p>}
-          <div className={'money-scene '+(graphic==='money'?'':'comparison-scene')} aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
+          <div className={'money-scene money-scene-'+graphic} aria-hidden="true"><div className="money-field">{Array.from({length:48},(_,i)=>{
             const opacity=Math.max(0,Math.min(1,equivalent.icons-i));
-            return <div key={i} className={graphic==='money'?'money-bundle':'comparison-icon'} style={{left:((i%6)*(graphic==='money'?14:13)+(graphic==='money'?0:(Math.floor(i/6)%2)*2))+'%',bottom:'calc('+Math.floor(i/6)+' * '+pileRowStep+'cqw)',opacity,zIndex:graphic==='money'?undefined:48-i,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
+            return <div key={i} className={graphic==='money'?'money-bundle':'comparison-icon'} style={{left:((i%grid.columns)*grid.leftStep)+'%',bottom:'calc('+Math.floor(i/grid.columns)+' * '+grid.rowStep+'cqw)',opacity,zIndex:graphic==='money'?undefined:48-i,transform:'translateY('+(opacity?0:12)+'px)'}}><img src={'/art/'+graphicConfig.image} width="1024" height="1024" alt=""/></div>;
           })}</div></div>
           <span className="money-scale">{graphicConfig.legend}{equivalent.icons>48?' · Graphic capped at 48 icons; count shown in full.':''}</span>
         </div>
@@ -116,7 +115,7 @@ export default function Home() {
       <p>Figures verified 15 September 2026. All amounts are Singapore dollars, annualised and before tax. Calculations use the published reference point, not an individual's salary or the upper end of a salary band.</p>
       <p>Monthly reference = annual norm ÷ 20. Fixed pay = 12 months + a fixed 13th month. Add the selected AVC, performance and national bonus months. MR4 norm: 1 AVC + 3 performance + 3 national. PM norm: 1 AVC + 6 national, with no performance bonus.</p>
       <p>The main slider moves MR4 performance and national bonuses together; for the PM it moves national bonus only. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
-      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The value per icon stays fixed across roles and frameworks. Piles expand to fill the graphic area as the selected bonus changes. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents ten months of median household income, not a property purchase. Partial icons are faded. Illustrations stop at 48 icons; numerical totals continue.</p>
+      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. The value per icon and row spacing stay fixed across roles, frameworks and slider positions. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents eight months of median household income, not a property purchase. Partial icons are faded. Illustrations stop at 48 icons; numerical totals continue.</p>
       <p>The house scale uses S$12,500 per month, rounded from the 2025 median monthly household market income of S$12,446. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
       <p>The current report gives a typical AVC of 1 month, not a universal maximum. The 2025 civil-service AVC was 1.7 months. “Maximum” here refers only to performance and national bonuses at the stated AVC assumption.</p>
       <ul><li><a href={SOURCES.previous} target="_blank" rel="noreferrer">2012 White Paper · salary structure, paragraphs 77–78 ↗</a></li><li><a href={SOURCES.revised} target="_blank" rel="noreferrer">2026 review · Table 1 and Annex E ↗</a></li><li><a href={SOURCES.october} target="_blank" rel="noreferrer">PMO · implementation announcement, 8 September 2026 ↗</a></li><li><a href={SOURCES.avc} target="_blank" rel="noreferrer">PSD · 2025 civil-service AVC ↗</a></li></ul>
