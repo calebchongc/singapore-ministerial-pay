@@ -3,9 +3,9 @@ export type Framework = 'previous' | 'revised';
 export type Bonuses = { performance: number; national: number };
 export type GraphicMode = 'money' | 'rice' | 'household';
 export const GRAPHICS = {
-  money: {label:'Money',image:'money-stack.png',unitValue:100000,unitsPerIcon:1,legend:'Each bundle ≈ S$100,000'},
+  money: {label:'Money',image:'money-stack-thousand-note.png',unitValue:100000,unitsPerIcon:1,legend:'Each bundle ≈ S$100,000'},
   rice: {label:'Chicken rice',image:'chicken-rice.png',unitValue:4,unitsPerIcon:25000,legend:'1 plate = S$4 · Each graphic = 25,000 plates'},
-  household: {label:'Household income',image:'household.png',unitValue:12500,unitsPerIcon:8,legend:'1 month ≈ S$12,500 · Each house = 8 months of household income'},
+  household: {label:'HDB block',image:'household.png',unitValue:149352,unitsPerIcon:1,legend:'Each HDB block = annual median household income, S$149,352'},
 } as const;
 // Reference norms, not personal remuneration. 2026 report Table 1 and Annex E.
 export const REFERENCES = {
@@ -30,6 +30,11 @@ export function calculate(role: Role, framework: Framework, bonus: Bonuses, avcM
   const national=monthly*bonus.national, avc=monthly*avcMonths;
   return {monthly,basic,thirteenth,performance,national,avc,fixed:basic+thirteenth,
     variable:performance+national+avc,total:basic+thirteenth+performance+national+avc};
+}
+export function calculatePersonal(monthly:number, bonusMonths:number, avcMonths:number) {
+  const basic=monthly*12, thirteenth=monthly, avc=monthly*avcMonths, bonus=monthly*bonusMonths;
+  return {monthly,basic,thirteenth,performance:bonus,national:0,avc,fixed:basic+thirteenth,
+    variable:bonus+avc,total:basic+thirteenth+bonus+avc};
 }
 export function parseAvc(raw: string): number | null {
   const value=Number(raw);

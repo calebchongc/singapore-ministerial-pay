@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculate, linkedBonuses, parseAvc, moneyUnits, scaleComparison } from './salary.ts';
+import { calculate, calculatePersonal, linkedBonuses, parseAvc, moneyUnits, scaleComparison } from './salary.ts';
 
 test('published norms across both roles and frameworks', () => {
   for (const [role, old, revised] of [['mr4',1100000,1800000],['pm',2200000,3600000]] as const) {
@@ -45,16 +45,23 @@ test('chicken rice uses S$4 whole plates and groups 25,000 plates per icon', () 
   assert.equal(scaleComparison(11,'rice').quantity,2);
   assert.equal(scaleComparison(0,'rice').quantity,0);
 });
-test('household income is counted in months, with eight months per house', () => {
-  assert.equal(scaleComparison(12500,'household').quantity,1);
-  assert.equal(scaleComparison(1800000,'household').quantity,144);
-  assert.equal(scaleComparison(4680000,'household').icons,46.8);
+test('household income uses the annual median household income scale', () => {
+  assert.equal(scaleComparison(149352,'household').quantity,1);
+  assert.equal(scaleComparison(1800000,'household').icons,1800000/149352);
+  assert.equal(scaleComparison(4680000,'household').icons,4680000/149352);
+});
+test('personal salary applies the same 13th-month, AVC and bonus-month calculator', () => {
+  const pay=calculatePersonal(5000,6,1);
+  assert.equal(pay.basic,60000);
+  assert.equal(pay.thirteenth,5000);
+  assert.equal(pay.variable,35000);
+  assert.equal(pay.total,100000);
 });
 test('the Prime Minister maximum maps to 46.8 S$100,000 pictograms', () => {
   const maximum=calculate('pm','revised',linkedBonuses('pm',12),1).total;
   assert.equal(scaleComparison(maximum,'money').icons,46.8);
   assert.equal(scaleComparison(maximum,'rice').icons,46.8);
-  assert.equal(scaleComparison(maximum,'household').icons,46.8);
+  assert.equal(scaleComparison(maximum,'household').icons,4680000/149352);
 });
 test('all graphic scales remain proportional across roles and frameworks', () => {
   for(const mode of ['money','rice','household'] as const){
