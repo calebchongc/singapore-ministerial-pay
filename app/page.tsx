@@ -20,7 +20,7 @@ export default function Home() {
   const pay=calculate(role,framework,bonus,avc);
   const graphicConfig=GRAPHICS[graphic];
   const equivalent=scaleComparison(pay.total,graphic);
-  const equivalentText=graphic==='money'?'':graphic==='rice'?equivalent.quantity.toLocaleString('en-SG')+' plates':equivalent.quantity.toLocaleString('en-SG',{maximumFractionDigits:1})+' years of median household income';
+  const equivalentText=graphic==='money'?'':graphic==='rice'?equivalent.quantity.toLocaleString('en-SG')+' plates':equivalent.quantity.toLocaleString('en-SG',{maximumFractionDigits:1})+' months of median household income';
   const other=calculate(role,framework==='previous'?'revised':'previous',bonus,avc);
   const months=bonus.performance+bonus.national;
   const avcError=parseAvc(avcText)===null;
@@ -114,8 +114,8 @@ export default function Home() {
       <p>Figures verified 15 September 2026. All amounts are Singapore dollars, annualised and before tax. Calculations use the published reference point, not an individual's salary or the upper end of a salary band.</p>
       <p>Monthly reference = annual norm ÷ 20. Fixed pay = 12 months + a fixed 13th month. Add the selected AVC, performance and national bonus months. MR4 norm: 1 AVC + 3 performance + 3 national. PM norm: 1 AVC + 6 national, with no performance bonus.</p>
       <p>The main slider moves MR4 performance and national bonuses together; for the PM it moves national bonus only. Changing role redistributes their combined months to the selected role. Adjusting components independently creates a custom scenario. Moving the main slider links them again and retains AVC.</p>
-      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. Graphic scales stay fixed across roles and frameworks. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents one year of median household income, not a property purchase. Partial icons are faded. Illustrations stop at 48 icons; numerical totals continue.</p>
-      <p>The house scale uses S$150,000 per year, rounded from the 2025 median monthly household market income of S$12,446 × 12 = S$149,352. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
+      <p>Bonuses model payouts, not the economic indicators used to decide them. Salary bands permit pay above and below the reference point. Graphic scales stay fixed across roles and frameworks. One money bundle represents S$100,000; each rice graphic represents 25,000 plates at the assumed S$4 per plate. Plate totals are rounded down to whole plates. One house represents ten months of median household income, not a property purchase. Partial icons are faded. Illustrations stop at 48 icons; numerical totals continue.</p>
+      <p>The house scale uses S$12,500 per month, rounded from the 2025 median monthly household market income of S$12,446. This <a href={SOURCES.household} target="_blank" rel="noreferrer">SingStat measure</a> covers resident households and includes employment income (including employer CPF contributions) and non-employment income. It is household income, not individual take-home pay.</p>
       <p>The current report gives a typical AVC of 1 month, not a universal maximum. The 2025 civil-service AVC was 1.7 months. “Maximum” here refers only to performance and national bonuses at the stated AVC assumption.</p>
       <ul><li><a href={SOURCES.previous} target="_blank" rel="noreferrer">2012 White Paper · salary structure, paragraphs 77–78 ↗</a></li><li><a href={SOURCES.revised} target="_blank" rel="noreferrer">2026 review · Table 1 and Annex E ↗</a></li><li><a href={SOURCES.october} target="_blank" rel="noreferrer">PMO · implementation announcement, 8 September 2026 ↗</a></li><li><a href={SOURCES.avc} target="_blank" rel="noreferrer">PSD · 2025 civil-service AVC ↗</a></li></ul>
     </div></details></section>
@@ -123,6 +123,7 @@ export default function Home() {
     <p className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
   </main>;
 }
+
 
 
 

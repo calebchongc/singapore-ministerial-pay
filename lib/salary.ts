@@ -5,7 +5,7 @@ export type GraphicMode = 'money' | 'rice' | 'household';
 export const GRAPHICS = {
   money: {label:'Money',image:'money-stack.png',unitValue:100000,unitsPerIcon:1,legend:'Each bundle unit ≈ S$100,000'},
   rice: {label:'Chicken rice',image:'chicken-rice.png',unitValue:4,unitsPerIcon:25000,legend:'1 plate = S$4 · Each graphic = 25,000 plates'},
-  household: {label:'Household income',image:'household.png',unitValue:150000,unitsPerIcon:1,legend:'Each house = 1 year of household income ≈ S$150,000'},
+  household: {label:'Household income',image:'household.png',unitValue:12500,unitsPerIcon:10,legend:'1 month ≈ S$12,500 · Each house = 10 months of household income'},
 } as const;
 // Reference norms, not personal remuneration. 2026 report Table 1 and Annex E.
 export const REFERENCES = {
@@ -42,4 +42,6 @@ export function scaleComparison(total:number,mode:GraphicMode) {
   return {quantity:mode==='rice'?Math.floor(exact):exact,icons:exact/config.unitsPerIcon};
 }
 export const currency=(value:number)=>'S$'+new Intl.NumberFormat('en-SG',{maximumFractionDigits:0}).format(value);
+
+
 

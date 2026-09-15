@@ -45,10 +45,10 @@ test('chicken rice uses S$4 whole plates and groups 25,000 plates per icon', () 
   assert.equal(scaleComparison(11,'rice').quantity,2);
   assert.equal(scaleComparison(0,'rice').quantity,0);
 });
-test('one house represents a rounded annual household income, not property price', () => {
-  assert.equal(scaleComparison(150000,'household').quantity,1);
-  assert.equal(scaleComparison(1800000,'household').quantity,12);
-  assert.equal(scaleComparison(4680000,'household').icons,31.2);
+test('household income is counted in months, with ten months per house', () => {
+  assert.equal(scaleComparison(12500,'household').quantity,1);
+  assert.equal(scaleComparison(1800000,'household').quantity,144);
+  assert.equal(scaleComparison(4680000,'household').icons,37.44);
 });
 test('all graphic scales remain proportional across roles and frameworks', () => {
   for(const mode of ['money','rice','household'] as const){
@@ -56,3 +56,4 @@ test('all graphic scales remain proportional across roles and frameworks', () =>
     assert.ok(scaleComparison(6000000,mode).icons>scaleComparison(4800000,mode).icons);
   }
 });
+
