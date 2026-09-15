@@ -13,8 +13,9 @@ export const REFERENCES = {
   pm: { previous: 2_200_000, revised: 3_600_000 },
 } as const;
 export const SOURCES = {
-  previous: 'https://www.psd.gov.sg/files/white-paper---salaries-for-a-capable-and-committed-government.pdf',
-  revised: 'https://go.gov.sg/2026report',
+  framework: 'https://ask.gov.sg/psd/questions/cmf0m1w3u012ced2hcc0baz0v?from=agencyhomepage',
+  previous: 'https://isomer-user-content.by.gov.sg/147/18da1d6a-96b2-4520-acc4-dea09aa6e324/press-release-2011-national-bonus-for-political-appointment-holders.pdf',
+  revised: 'https://isomer-user-content.by.gov.sg/147/dbb342e3-14a4-4949-80d4-7e410110e3d1/Committee%20Report%20-%202026%20Review%20of%20Salaries%20for%20Political%20Appointment%20Holders%20and%20Members%20of%20Parl.pdf',
   october: 'https://www.pmo.gov.sg/newsroom/media-release-on-building-a-strong-team-for-singapore/',
   avc: 'https://www.psd.gov.sg/newsroom/civil-service-year-end-payment-2025/',
   household: 'https://www.singstat.gov.sg/-/media/files/publications/households/pp-s32.ashx',
